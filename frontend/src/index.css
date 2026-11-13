@@ -1,0 +1,63 @@
+/* ============================================================================
+   index.css - global styles.
+   Tailwind CSS v4 is loaded with a single import; most styling is done with
+   utility classes directly in the components. A few reusable classes
+   (buttons, inputs, cards) are defined below with @apply to avoid repetition.
+   ============================================================================ */
+
+@import "tailwindcss"; /* Loads Tailwind's base styles, components and utilities */
+
+:root {
+  color-scheme: dark; /* Native controls (select, file input, scrollbars) use dark colours */
+}
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 antialiased; /* Dark cinema background, light text, smooth fonts */
+  }
+
+  ::selection {
+    @apply bg-amber-400/40; /* Highlight colour when selecting text */
+  }
+}
+
+@layer components {
+  /* ---- Buttons ---------------------------------------------------------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition; /* Shared button shape */
+    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400; /* Visible keyboard focus */
+    @apply disabled:cursor-not-allowed disabled:opacity-50; /* Disabled look */
+  }
+  .btn-primary {
+    @apply bg-amber-400 text-slate-950 hover:bg-amber-300; /* Main action (yellow) */
+  }
+  .btn-secondary {
+    @apply border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700; /* Secondary action (grey) */
+  }
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-500; /* Destructive action (red) */
+  }
+  .btn-ghost {
+    @apply text-slate-300 hover:bg-slate-800 hover:text-white; /* Low-emphasis action */
+  }
+
+  /* ---- Form fields ------------------------------------------------------ */
+  .label {
+    @apply mb-1 block text-sm font-medium text-slate-300; /* Field label */
+  }
+  .input {
+    @apply w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder-slate-500; /* Text field */
+    @apply focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 focus:outline-none; /* Focus state */
+  }
+  .input-error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500/30; /* Field with a validation error */
+  }
+  .field-error {
+    @apply mt-1 text-sm text-red-400; /* Validation message under a field */
+  }
+
+  /* ---- Containers ------------------------------------------------------- */
+  .card {
+    @apply rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg shadow-black/20; /* Panel */
+  }
+}

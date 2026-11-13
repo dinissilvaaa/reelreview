@@ -1,0 +1,30 @@
+// ----------------------------------------------------------------------------
+// tsconfig.app.json - TypeScript settings for the React code in src/.
+// Vite does the actual bundling; TypeScript only type-checks (noEmit).
+// ----------------------------------------------------------------------------
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo", // Cache file for faster incremental checks
+    "target": "es2023", // Modern JavaScript features are allowed
+    "lib": ["ES2023", "DOM"], // Built-in types: modern JS + browser APIs (document, window...)
+    "module": "esnext", // Use native ES modules (import/export)
+    "types": ["vite/client"], // Types for Vite features (import.meta.env, asset imports)
+    "allowArbitraryExtensions": true, // Allow importing files such as .css
+    "skipLibCheck": true, // Do not type-check node_modules (faster)
+
+    /* Bundler mode */
+    "moduleResolution": "bundler", // Resolve imports the way Vite does
+    "allowImportingTsExtensions": true, // Allow "./file.ts" style imports
+    "verbatimModuleSyntax": true, // Type-only imports must use `import type` (clearer, smaller bundles)
+    "moduleDetection": "force", // Treat every file as a module
+    "noEmit": true, // Only check types, Vite produces the JavaScript
+    "jsx": "react-jsx", // Use React 17+ automatic JSX runtime (no `import React` needed)
+
+    /* Linting */
+    "noUnusedLocals": true, // Error on unused variables
+    "noUnusedParameters": true, // Error on unused function parameters
+    "erasableSyntaxOnly": true, // Forbid TS-only runtime features (enums, namespaces...)
+    "noFallthroughCasesInSwitch": true // Every switch case must break/return
+  },
+  "include": ["src"] // Type-check everything inside src/
+}

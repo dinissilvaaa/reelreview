@@ -1,0 +1,27 @@
+// ----------------------------------------------------------------------------
+// tsconfig.node.json - TypeScript settings for files that run in Node.js
+// (only vite.config.ts), not in the browser.
+// ----------------------------------------------------------------------------
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo", // Cache file for faster incremental checks
+    "target": "es2023", // Modern JavaScript
+    "lib": ["ES2023"], // No DOM here: this code runs in Node.js
+    "types": ["node"], // Node.js globals such as `process`
+    "skipLibCheck": true, // Do not type-check node_modules (faster)
+
+    /* Bundler mode */
+    "module": "nodenext", // Follow Node.js module rules
+    "allowImportingTsExtensions": true, // Allow "./file.ts" style imports
+    "verbatimModuleSyntax": true, // Type-only imports must use `import type`
+    "moduleDetection": "force", // Treat every file as a module
+    "noEmit": true, // Only check types
+
+    /* Linting */
+    "noUnusedLocals": true, // Error on unused variables
+    "noUnusedParameters": true, // Error on unused function parameters
+    "erasableSyntaxOnly": true, // Forbid TS-only runtime features
+    "noFallthroughCasesInSwitch": true // Every switch case must break/return
+  },
+  "include": ["vite.config.ts"] // The only Node.js file in the frontend
+}

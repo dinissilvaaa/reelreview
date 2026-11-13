@@ -1,0 +1,12 @@
+// ----------------------------------------------------------------------------
+// tsconfig.json - root TypeScript config of the frontend.
+// It only points to two "project references": one for the browser code (src/)
+// and one for Node.js config files (vite.config.ts). `tsc -b` builds both.
+// ----------------------------------------------------------------------------
+{
+  "files": [], // This root config compiles nothing by itself
+  "references": [
+    { "path": "./tsconfig.app.json" }, // Browser code (React app + tests)
+    { "path": "./tsconfig.node.json" } // Node.js code (vite.config.ts)
+  ]
+}

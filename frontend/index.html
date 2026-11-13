@@ -1,0 +1,17 @@
+<!doctype html>
+<!-- index.html: the single HTML page of the SPA. React renders everything inside #root. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" /> <!-- Support every character (accents, emojis...) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- Responsive on phones -->
+    <meta name="description" content="ReelReview - browse, rate and review movies." /> <!-- Text shown by search engines -->
+    <meta name="theme-color" content="#020617" /> <!-- Browser UI colour on mobile (matches the dark theme) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> <!-- Tab icon -->
+    <title>ReelReview</title> <!-- Default tab title (each page updates it) -->
+  </head>
+  <body>
+    <div id="root"></div> <!-- React mounts the whole application here -->
+    <noscript>ReelReview needs JavaScript enabled to run.</noscript> <!-- Shown only when JS is disabled -->
+    <script type="module" src="/src/main.tsx"></script> <!-- Entry point of the React app -->
+  </body>
+</html>
