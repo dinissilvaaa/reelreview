@@ -1,0 +1,408 @@
+{
+  "info": {
+    "name": "ReelReview API",
+    "description": "Requests for every ReelReview endpoint. Run the folders in order (or use the Collection Runner): the test scripts save tokens and ids into collection variables so later requests can use them. Requires the backend running with demo data (SEED_ON_START=true).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "userToken", "value": "" },
+    { "key": "adminToken", "value": "" },
+    { "key": "newUserId", "value": "" },
+    { "key": "movieId", "value": "" },
+    { "key": "newMovieId", "value": "" },
+    { "key": "reviewId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "0. Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": { "method": "GET", "url": "{{baseUrl}}/health" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Register a new user (201)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/register",
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"postman{{$timestamp}}\",\n  \"email\": \"postman{{$timestamp}}@example.com\",\n  \"password\": \"Password123\"\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('userToken', body.token);",
+                  "pm.collectionVariables.set('newUserId', body.user.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register with invalid data (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/register",
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"x\",\n  \"email\": \"not-an-email\",\n  \"password\": \"123\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('400 Bad Request', () => pm.response.to.have.status(400));"] } }]
+        },
+        {
+          "name": "Login as admin (200)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/login",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@reelreview.com\",\n  \"password\": \"Admin123!\"\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('adminToken', pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login with wrong password (401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/login",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"demo@reelreview.com\",\n  \"password\": \"WrongPassword1\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"] } }]
+        },
+        {
+          "name": "Current user (200)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }],
+            "url": "{{baseUrl}}/auth/me"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Current user without token (401)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/auth/me" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "2. Movies",
+      "item": [
+        {
+          "name": "List movies - best rated (200)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/movies?sort=rating&page=1&limit=12" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('movieId', pm.response.json().movies[0]._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Search + filter by genre (200)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/movies?search=nolan&genre=Sci-Fi" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Unknown genre (400)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/movies?genre=Cooking" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('400 Bad Request', () => pm.response.to.have.status(400));"] } }]
+        },
+        {
+          "name": "List genres (200)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/movies/genres" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Get one movie (200)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/movies/{{movieId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Get movie with malformed id (400)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/movies/not-an-id" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('400 Bad Request', () => pm.response.to.have.status(400));"] } }]
+        },
+        {
+          "name": "Get missing movie (404)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/movies/64b7f9f9f9f9f9f9f9f9f9f9" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('404 Not Found', () => pm.response.to.have.status(404));"] } }]
+        },
+        {
+          "name": "Create movie as admin (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/movies",
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Arrival\",\n  \"description\": \"A linguist is recruited to communicate with alien visitors.\",\n  \"director\": \"Denis Villeneuve\",\n  \"releaseYear\": 2016,\n  \"durationMinutes\": 116,\n  \"genres\": [\"Sci-Fi\", \"Drama\", \"Mystery\"],\n  \"posterUrl\": \"\"\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('newMovieId', pm.response.json().movie._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create movie with a poster upload (201, form-data)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/movies",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Uploaded Poster Demo", "type": "text" },
+                { "key": "description", "value": "Created with multipart/form-data and an image file.", "type": "text" },
+                { "key": "director", "value": "Postman", "type": "text" },
+                { "key": "releaseYear", "value": "2024", "type": "text" },
+                { "key": "genres", "value": "Comedy,Family", "type": "text" },
+                { "key": "poster", "type": "file", "src": [], "description": "Choose a JPG/PNG/WEBP/GIF (max 2 MB) before sending" }
+              ]
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));"] } }]
+        },
+        {
+          "name": "Create movie as normal user (403)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "url": "{{baseUrl}}/movies",
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Not allowed\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403 Forbidden', () => pm.response.to.have.status(403));"] } }]
+        },
+        {
+          "name": "Create movie with invalid data (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/movies",
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"\",\n  \"releaseYear\": 1500,\n  \"genres\": [\"Cooking\"]\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('400 Bad Request', () => pm.response.to.have.status(400));"] } }]
+        },
+        {
+          "name": "Update movie as admin (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/movies/{{newMovieId}}",
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Arrival (2016)\",\n  \"durationMinutes\": 118\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "3. Reviews",
+      "item": [
+        {
+          "name": "Reviews of a movie (200)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/movies/{{movieId}}/reviews" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Create review (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "url": "{{baseUrl}}/movies/{{newMovieId}}/reviews",
+            "body": { "mode": "raw", "raw": "{\n  \"rating\": 4,\n  \"comment\": \"Clever and emotional science fiction.\"\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('reviewId', pm.response.json().review._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create a second review for the same movie (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "url": "{{baseUrl}}/movies/{{newMovieId}}/reviews",
+            "body": { "mode": "raw", "raw": "{\n  \"rating\": 5\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('409 Conflict', () => pm.response.to.have.status(409));"] } }]
+        },
+        {
+          "name": "Create review with invalid rating (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/movies/{{newMovieId}}/reviews",
+            "body": { "mode": "raw", "raw": "{\n  \"rating\": 9\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('400 Bad Request', () => pm.response.to.have.status(400));"] } }]
+        },
+        {
+          "name": "Update my review (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "url": "{{baseUrl}}/reviews/{{reviewId}}",
+            "body": { "mode": "raw", "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Even better the second time.\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Update someone else's review as admin (403)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/reviews/{{reviewId}}",
+            "body": { "mode": "raw", "raw": "{\n  \"rating\": 1\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403 Forbidden', () => pm.response.to.have.status(403));"] } }]
+        },
+        {
+          "name": "My reviews (200)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }],
+            "url": "{{baseUrl}}/reviews/me"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Delete my review (200)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }],
+            "url": "{{baseUrl}}/reviews/{{reviewId}}"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "4. Admin - users",
+      "item": [
+        {
+          "name": "List users as normal user (403)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }],
+            "url": "{{baseUrl}}/users"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403 Forbidden', () => pm.response.to.have.status(403));"] } }]
+        },
+        {
+          "name": "List users (200)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/users"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Promote user to admin (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/users/{{newUserId}}/role",
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"admin\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Delete user (200)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/users/{{newUserId}}"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "5. Cleanup",
+      "item": [
+        {
+          "name": "Delete movie as admin (200)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/movies/{{newMovieId}}"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Unknown route (404)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/does-not-exist" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('404 Not Found', () => pm.response.to.have.status(404));"] } }]
+        }
+      ]
+    }
+  ]
+}

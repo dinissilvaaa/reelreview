@@ -1,0 +1,13 @@
+{
+  "name": "reelreview-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "End-to-end smoke test: drives a real Chrome/Edge browser through the main user flows",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node smoke-test.cjs"
+  },
+  "dependencies": {
+    "puppeteer-core": "^25.17.0"
+  }
+}
