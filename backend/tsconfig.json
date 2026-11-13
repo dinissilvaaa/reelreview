@@ -1,0 +1,23 @@
+// ----------------------------------------------------------------------------
+// tsconfig.json - TypeScript settings used by the editor and `npm run typecheck`.
+// It covers the source code AND the tests. The production build uses
+// tsconfig.build.json (which extends this file and only compiles /src).
+// ----------------------------------------------------------------------------
+{
+  "compilerOptions": {
+    "target": "ES2022", // Emit modern JavaScript supported by Node.js 20+
+    "lib": ["ES2022"], // Built-in type definitions available to the code
+    "module": "nodenext", // Follow Node.js module rules (CommonJS here, see package.json "type")
+    "moduleResolution": "nodenext", // Resolve imports exactly like Node.js does
+    "types": ["node"], // Load @types/node so `process`, `Buffer`, etc. are typed
+    "rootDir": ".", // Root folder of all input files (src + tests)
+    "strict": true, // Enable every strict type-checking option (safer code)
+    "esModuleInterop": true, // Allow `import express from 'express'` for CommonJS packages
+    "skipLibCheck": true, // Do not type-check .d.ts files inside node_modules (faster)
+    "forceConsistentCasingInFileNames": true, // Avoid bugs on case-sensitive file systems (Linux/Docker)
+    "resolveJsonModule": true, // Allow importing .json files
+    "noFallthroughCasesInSwitch": true, // Every `case` in a switch must break/return
+    "noEmit": true // This config only checks types; it never writes .js files
+  },
+  "include": ["src", "tests", "vitest.config.mts"] // Files TypeScript should look at
+}

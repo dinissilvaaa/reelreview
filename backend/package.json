@@ -1,0 +1,54 @@
+{
+  "name": "reelreview-backend",
+  "version": "1.0.0",
+  "description": "ReelReview REST API - browse, rate and review movies (Express + TypeScript + MongoDB)",
+  "main": "dist/index.js",
+  "type": "commonjs",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "seed": "tsx src/seed/runSeed.ts --reset",
+    "seed:prod": "node dist/seed/runSeed.js --reset",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "keywords": [
+    "movies",
+    "reviews",
+    "express",
+    "mongodb",
+    "typescript"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.4",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.12.1",
+    "morgan": "^1.12.1",
+    "multer": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^24.19.2",
+    "@types/supertest": "^7.2.1",
+    "mongodb-memory-server-core": "^11.3.0",
+    "supertest": "^7.3.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}

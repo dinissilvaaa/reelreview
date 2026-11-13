@@ -1,0 +1,14 @@
+// ----------------------------------------------------------------------------
+// tsconfig.build.json - used by `npm run build` to compile /src into /dist.
+// It inherits every option from tsconfig.json and only overrides what changes.
+// ----------------------------------------------------------------------------
+{
+  "extends": "./tsconfig.json", // Reuse all the shared compiler options
+  "compilerOptions": {
+    "rootDir": "src", // Only the source folder is compiled
+    "outDir": "dist", // Compiled JavaScript is written to /dist
+    "noEmit": false, // Override the base config: here we DO want .js output
+    "sourceMap": true // Generate .map files so stack traces point to the .ts lines
+  },
+  "include": ["src"] // Tests and config files are NOT part of the production build
+}
