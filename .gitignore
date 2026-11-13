@@ -1,0 +1,35 @@
+# -----------------------------------------------------------------------------
+# Files and folders Git must ignore (never committed to GitHub)
+# -----------------------------------------------------------------------------
+
+# Dependencies (re-created with "npm install")
+node_modules/
+
+# Build output (re-created with "npm run build")
+dist/
+dist-ssr/
+
+# Environment files with secrets (the .env.example templates ARE committed)
+.env
+.env.*
+!.env.example
+*.local
+
+# Poster images uploaded at runtime
+backend/uploads/
+
+# Test coverage reports
+coverage/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Operating system / editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.sw?
