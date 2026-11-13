@@ -1,0 +1,8 @@
+# Files Docker must NOT copy into the image
+node_modules
+dist
+coverage
+.env
+.env.*
+!.env.example
+*.log

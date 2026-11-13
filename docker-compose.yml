@@ -1,0 +1,73 @@
+# -----------------------------------------------------------------------------
+# docker-compose.yml - runs the WHOLE application with one command:
+#
+#     docker compose up --build
+#
+# Then open http://localhost:8080
+#
+# Services:
+#   mongo    -> MongoDB database          (localhost:27017)
+#   backend  -> Express REST API          (localhost:5000/api)
+#   frontend -> nginx + React SPA         (localhost:8080)
+#
+# Optional: create a ".env" file next to this one (see .env.example) to
+# override JWT_SECRET and the admin credentials.
+# -----------------------------------------------------------------------------
+
+# Project name (prefix of containers, networks and volumes)
+name: reelreview
+
+services:
+  # ---- Database ---------------------------------------------------------------
+  mongo:
+    image: mongo:8 # Official MongoDB 8 image
+    restart: unless-stopped # Restart automatically if it crashes
+    ports:
+      - "27017:27017" # Exposed so you can connect with MongoDB Compass or run the backend locally
+    volumes:
+      - mongo-data:/data/db # Keep the data when containers are recreated
+    healthcheck: # "healthy" once MongoDB answers a ping
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # ---- REST API ---------------------------------------------------------------
+  backend:
+    build: ./backend # Built from backend/Dockerfile
+    restart: unless-stopped # Restart automatically if it crashes
+    environment:
+      NODE_ENV: production # Production mode
+      PORT: 5000 # Port inside the container
+      MONGO_URI: mongodb://mongo:27017/reelreview # "mongo" = the service above (Docker's internal DNS)
+      JWT_SECRET: ${JWT_SECRET:-docker-demo-secret-change-me-in-production} # Override it in .env for real deployments
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d} # Token lifetime
+      CLIENT_URL: http://localhost:8080 # Frontend origin allowed by CORS
+      TRUST_PROXY: "true" # Requests arrive through nginx
+      SEED_ON_START: "true" # Insert demo data when the database is empty
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@reelreview.com} # Seeded admin email
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin123!} # Seeded admin password
+    ports:
+      - "5000:5000" # API reachable at http://localhost:5000/api (handy for Postman)
+    volumes:
+      - uploads-data:/app/uploads # Keep uploaded posters when containers are recreated
+    depends_on:
+      mongo:
+        condition: service_healthy # Wait until MongoDB is ready
+
+  # ---- Web app ----------------------------------------------------------------
+  frontend:
+    build: ./frontend # Built from frontend/Dockerfile
+    restart: unless-stopped # Restart automatically if it crashes
+    ports:
+      - "8080:80" # Open http://localhost:8080 in your browser
+    depends_on:
+      backend:
+        condition: service_healthy # nginx needs the "backend" host to exist when it starts
+
+# Named volumes = data stored by Docker that survives "docker compose down"
+# (use "docker compose down -v" to delete them and start from scratch)
+volumes:
+  mongo-data:
+  uploads-data:
